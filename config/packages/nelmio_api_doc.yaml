@@ -1,0 +1,16 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            description: Backend API for Inspector Schedule
+        servers:
+            - url: http://127.0.0.1:8000
+              description: Localhost Local API
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+        host_patterns: # document only routes with a host of the form api.*
+            - ^api\.
+        documentation:
+            info:
+                title: 'Inspector Schedule'
+                version: '1.0.0'
