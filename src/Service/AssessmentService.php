@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Dto\Request\AssignJobRequest;
 use App\Dto\Request\CompleteJobRequest;
+use App\Dto\Response\AssessmentResponse;
 use App\Entity\Assessment;
 use App\Entity\Inspector;
 use App\Enum\AssessmentStatusEnum;
@@ -27,7 +28,7 @@ class AssessmentService
     public function assignJob(
         Inspector $inspector,
         AssignJobRequest $request,
-    ): Assessment {
+    ): AssessmentResponse {
         $this->logger->info('Start process to assign a new job to inspector with id '. $inspector->getId() .'.');
 
         $assessment = new Assessment();
@@ -54,7 +55,7 @@ class AssessmentService
         $job->setStatus(JobStatusEnum::ASSIGNED);
         $this->jobRepository->save($job, true);
 
-        return $assessment;
+        return new AssessmentResponse($assessment);
     }
 
     public function completeJob(

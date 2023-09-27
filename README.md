@@ -32,12 +32,11 @@ cp .env.example .env
 php bin/console doctrine:database:create
 ```
 
-5. Run migrations and run commands to add fictive data in db
+5. Run migrations and load data fixtures
 
 ```bash
 php bin/console doctrine:migrations:migrate
-php bin/console app:create-inspector 
-php bin/console app:create-job 
+bin/console doctrine:fixtures:load
 ```
 6. Start server 
 

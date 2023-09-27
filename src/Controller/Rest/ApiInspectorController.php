@@ -18,11 +18,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Annotation\Route;
-
 
 #[OA\Tag(name: 'Inspectors')]
-#[Rest\Route('/api')]
 class ApiInspectorController extends AbstractController
 {
     public function __construct(
@@ -33,7 +30,7 @@ class ApiInspectorController extends AbstractController
     }
 
     #[Rest\Get(
-        path: '/inspectors',
+        path: '/api/inspectors',
         name: 'api_get_inspectors',
         methods: ['GET'],
     )]
@@ -42,15 +39,24 @@ class ApiInspectorController extends AbstractController
         description: 'Success.',
         content: new Model(type: InspectorResponse::class, groups: ['inspectors'])
     )]
-    public function index()
+    public function index(): JsonResponse
     {
         $inspectors = $this->inspectorRepository->findAll();
-
-        return new JsonResponse($inspectors, 200, [], true);
+        $responseData = [];
+        if ($inspectors) {
+            foreach ($inspectors as $inspector){
+                $responseData[] = [
+                    'id' => $inspector->getId(),
+                    'name' => $inspector->getName(),
+                    'location' => $inspector->getLocation(),
+                ];
+            }
+        }
+        return new JsonResponse($responseData, 200);
     }
 
     #[Rest\Post(
-        path: '/inspectors/{id}/job',
+        path: '/api/inspectors/{id}/job',
         name: 'api_post_inspectors_job',
         requirements: ['id' => '\d+']
     )]
@@ -76,20 +82,18 @@ class ApiInspectorController extends AbstractController
     public function assignJob(
         int $id,
         AssignJobRequest $request
-    ): JsonResponse
+    ): AssessmentResponse
     {
         $inspector = $this->inspectorRepository->find($id);
 
         if (!$inspector){
             throw new NotFoundHttpException('The inspector was not found.');
         }
-        $assignment = $this->assessmentService->assignJob($inspector, $request);
-
-        return new JsonResponse($assignment, 200, [], true);
+        return $this->assessmentService->assignJob($inspector, $request);
     }
 
     #[Rest\Put(
-        path: '/inspectors/{id}/job/{jobId}',
+        path: '/api/inspectors/{id}/job/{jobId}',
         name: 'api_put_inspectors_job',
         requirements: ['id' => '\d+']
     )]

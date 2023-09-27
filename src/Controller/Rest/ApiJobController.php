@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller\Rest;
 
-use App\Dto\Response\InspectorResponse;
 use App\Dto\Response\JobResponse;
 use App\Repository\JobRepository;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -13,10 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Symfony\Component\Routing\Annotation\Route;
 
 #[OA\Tag(name: 'Jobs')]
-#[Rest\Route('/api')]
 class ApiJobController extends AbstractController
 {
     public function __construct(
@@ -25,8 +22,8 @@ class ApiJobController extends AbstractController
     }
 
     #[Rest\Get(
-        path: '/jobs',
-        name: 'api_get_jobs'
+        path: '/api/jobs',
+        name: 'api_get_jobs',
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
@@ -36,7 +33,16 @@ class ApiJobController extends AbstractController
     public function index(): JsonResponse
     {
         $jobs = $this->jobRepository->findAll();
-
-        return new JsonResponse($jobs, 200, [], true);
+        $responseData = [];
+        if ($jobs) {
+            foreach ($jobs as $job){
+                $responseData[] = [
+                    'id' => $job->getId(),
+                    'description' => $job->getDescription(),
+                    'status' => $job->getStatus(),
+                ];
+            }
+        }
+        return new JsonResponse($responseData, 200);
     }
 }

@@ -12,7 +12,7 @@ class CompleteJobRequest
 {
     #[Assert\Type(type: Types::STRING)]
     #[Assert\Length(max: 255)]
-    #[OA\Property(example: 'Random notes')]
+    #[OA\Property(example: 'Assessment on completed job')]
     protected string $note;
 
     public function __construct(

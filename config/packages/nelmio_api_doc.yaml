@@ -1,16 +1,63 @@
 nelmio_api_doc:
     documentation:
         info:
+            title: Inspector Schedule
             description: Backend API for Inspector Schedule
+            version: 0.1.0
         servers:
-            - url: http://127.0.0.1:8000
+            - url: http://127.0.0.1
               description: Localhost Local API
+        components:
+            responses:
+                NotFound:
+                    description: The specified resource was not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                Unauthorized:
+                    description: Authorization information is missing or invalid.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+
+                UnprocessableEntity:
+                    description: Constraint violations in request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CustomErrors'
+            schemas:
+                # Schema for error response body
+                Error:
+                    type: object
+                    properties:
+                        code:
+                            type: string
+                        message:
+                            type: string
+                    required:
+                        - code
+                        - message
+                CustomError:
+                    type: object
+                    properties:
+                        title:
+                            type: string
+                        source:
+                            type: string
+                        detail:
+                            type: string
+                    required:
+                        - title
+                        - source
+                        - detail
+                CustomErrors:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CustomError'
     areas: # to filter documented areas
-        path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
-        host_patterns: # document only routes with a host of the form api.*
-            - ^api\.
-        documentation:
-            info:
-                title: 'Inspector Schedule'
-                version: '1.0.0'
+        default:
+            path_patterns:
+                - ^/api(?!/doc$|/doc\.json$) # Accepts routes under /api except /api/doc
