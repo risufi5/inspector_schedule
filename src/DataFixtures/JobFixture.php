@@ -11,7 +11,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class JobFixture extends BaseFixtures implements FixtureGroupInterface
 {
-    final public const COUNT_ELEMENTS = 5;
+    final public const COUNT_ELEMENTS = 8;
 
     public static function getGroups(): array
     {
@@ -25,7 +25,7 @@ class JobFixture extends BaseFixtures implements FixtureGroupInterface
             $job->setDescription($description);
 
             /** @var JobStatusEnum $jobStatus */
-            $jobStatus = $this->faker->randomElement(JobStatusEnum::cases());
+            $jobStatus = JobStatusEnum::NEW->value;
             $job->setStatus($jobStatus);
 
             $currentTime = new \DateTime();

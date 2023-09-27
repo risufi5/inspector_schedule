@@ -27,7 +27,7 @@ class ApiJobController extends AbstractController
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
-        description: 'Success.',
+        description: 'Return list of all jobs.',
         content: new Model(type: JobResponse::class, groups: ['jobs'])
     )]
     public function index(): JsonResponse

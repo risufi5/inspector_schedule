@@ -37,7 +37,7 @@ class ApiInspectorController extends AbstractController
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
-        description: 'Success.',
+        description: 'Return list of all inspectors.',
         content: new Model(type: InspectorResponse::class, groups: ['inspectors'])
     )]
     public function index(): JsonResponse
@@ -68,7 +68,7 @@ class ApiInspectorController extends AbstractController
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
-        description: 'Success.',
+        description: 'Return job assigned to an inspector.',
         content: new Model(type: AssessmentResponse::class, groups: [
             'assessments',
             'assessment.inspector',
@@ -108,7 +108,7 @@ class ApiInspectorController extends AbstractController
     )]
     #[OA\Response(
         response: Response::HTTP_OK,
-        description: 'Success.'
+        description: 'Return the job after it is completed by inspector.'
     )]
     #[OA\Response(
         ref: '#/components/responses/UnprocessableEntity',

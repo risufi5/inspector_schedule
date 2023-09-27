@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Dto\Request\AssignJobRequest;
 use App\Dto\Request\CompleteJobRequest;
-use App\Dto\Response\AssessmentResponse;
 use App\Entity\Assessment;
 use App\Entity\Inspector;
 use App\Entity\Job;
@@ -62,8 +61,8 @@ class AssessmentService
             'inspectorId' => $assessment->getInspector()->getId(),
             'jobId' => $assessment->getJob()->getId(),
             'status' => $assessment->getStatus(),
-            'assigned_date' => $assessment->getAssignedDate(),
-            'delivery_date' => $assessment->getDeliveryDate(),
+            'assigned_date' => $assessment->getAssignedDate()->format('Y-m-d H:i:s'),
+            'delivery_date' => $assessment->getDeliveryDate()->format('Y-m-d H:i:s'),
         ];
 
         return $assessmentDto;
@@ -94,8 +93,8 @@ class AssessmentService
             'inspectorId' => $assessment->getInspector()->getId(),
             'jobId' => $assessment->getJob()->getId(),
             'status' => $assessment->getStatus(),
-            'assigned_date' => $assessment->getAssignedDate(),
-            'delivery_date' => $assessment->getDeliveryDate(),
+            'assigned_date' => $assessment->getAssignedDate()->format('Y-m-d H:i:s'),
+            'delivery_date' => $assessment->getDeliveryDate()->format('Y-m-d H:i:s'),
             'note' => $assessment->getNote(),
         ];
         return $assessmentDto;

@@ -11,7 +11,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class InspectorFixture extends BaseFixtures implements FixtureGroupInterface
 {
-    final public const COUNT_ELEMENTS = 5;
+    final public const COUNT_ELEMENTS = 3;
 
     public static function getGroups(): array
     {
