@@ -7,6 +7,7 @@ use App\Dto\Request\CompleteJobRequest;
 use App\Dto\Response\AssessmentResponse;
 use App\Entity\Assessment;
 use App\Entity\Inspector;
+use App\Entity\Job;
 use App\Enum\AssessmentStatusEnum;
 use App\Enum\InspectorLocationEnum;
 use App\Enum\JobStatusEnum;
@@ -28,7 +29,8 @@ class AssessmentService
     public function assignJob(
         Inspector $inspector,
         AssignJobRequest $request,
-    ): AssessmentResponse {
+    ): array
+    {
         $this->logger->info('Start process to assign a new job to inspector with id '. $inspector->getId() .'.');
 
         $assessment = new Assessment();
@@ -36,7 +38,7 @@ class AssessmentService
         if (!$job) {
             throw new NotFoundHttpException('Job not found for id '. $request->getJobId() .'.');
         }
-        if ($job->getStatus() == JobStatusEnum::ASSIGNED) {
+        if ($job->getStatus() == JobStatusEnum::ASSIGNED->value) {
             throw new NotFoundHttpException('Job with id '. $request->getJobId() .' is already assigned.');
         }
         $currentTime = new \DateTime();
@@ -55,15 +57,30 @@ class AssessmentService
         $job->setStatus(JobStatusEnum::ASSIGNED);
         $this->jobRepository->save($job, true);
 
-        return new AssessmentResponse($assessment);
+        $assessmentDto[] = [
+            'id' => $assessment->getId(),
+            'inspectorId' => $assessment->getInspector()->getId(),
+            'jobId' => $assessment->getJob()->getId(),
+            'status' => $assessment->getStatus(),
+            'assigned_date' => $assessment->getAssignedDate(),
+            'delivery_date' => $assessment->getDeliveryDate(),
+        ];
+
+        return $assessmentDto;
     }
 
     public function completeJob(
-        Assessment $assessment,
+        Inspector $inspector,
+        Job  $job,
         CompleteJobRequest $request
-    ): void {
-        $this->logger->info('Start process to complete a job from inspector with id '. $assessment->getInspector()->getId() .'.');
+    ): array
+    {
+        $this->logger->info('Start process to complete a job from inspector with id '. $inspector->getId() .'.');
 
+        $assessment = $this->assessmentRepository->findOneBy(['inspector' => $inspector->getId(), 'job' => $job->getId()]);
+        if (!$assessment){
+            throw new NotFoundHttpException('The job with id ' . $job->getId() . ' is not assigned to the inspector.');
+        }
         $currentTime = new \DateTime();
         $currentTime->format('Y-m-d H:i:s');
         $assessment
@@ -71,6 +88,17 @@ class AssessmentService
             ->setStatus(AssessmentStatusEnum::COMPLETED)
             ->setUpdatedAt($currentTime);
         $this->assessmentRepository->save($assessment, true);
+
+        $assessmentDto[] = [
+            'id' => $assessment->getId(),
+            'inspectorId' => $assessment->getInspector()->getId(),
+            'jobId' => $assessment->getJob()->getId(),
+            'status' => $assessment->getStatus(),
+            'assigned_date' => $assessment->getAssignedDate(),
+            'delivery_date' => $assessment->getDeliveryDate(),
+            'note' => $assessment->getNote(),
+        ];
+        return $assessmentDto;
     }
 
     private function setTimezone(
@@ -78,16 +106,16 @@ class AssessmentService
         \DateTime $assignedTime
     ): \DateTime
     {
+        $timezone = new \DateTime();
+        $timezone->format('Y-m-d H:i:s');
         $location = $inspector->getLocation();
-        if ($location == InspectorLocationEnum::MADRID) {
+        if ($location == InspectorLocationEnum::MADRID->value) {
             $timezone = $assignedTime->modify('+2 hours');
-        } else if ($location == InspectorLocationEnum::MEXICO_CITY) {
+        } else if ($location == InspectorLocationEnum::MEXICO_CITY->value) {
             $timezone = $assignedTime->modify('-6 hours');
-        } else if ($location == InspectorLocationEnum::UK) {
+        } else if ($location == InspectorLocationEnum::UK->value) {
             $timezone = $assignedTime->modify('+1 hours');
         }
-        $timezone->format('Y-m-d H:i:s');
-
         return $timezone;
     }
 }

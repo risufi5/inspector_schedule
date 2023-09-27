@@ -5,7 +5,7 @@ nelmio_api_doc:
             description: Backend API for Inspector Schedule
             version: 0.1.0
         servers:
-            - url: http://127.0.0.1
+            - url: https://127.0.0.1:8000
               description: Localhost Local API
         components:
             responses:

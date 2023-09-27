@@ -8,8 +8,8 @@ use App\Dto\Request\AssignJobRequest;
 use App\Dto\Request\CompleteJobRequest;
 use App\Dto\Response\AssessmentResponse;
 use App\Dto\Response\InspectorResponse;
-use App\Repository\AssessmentRepository;
 use App\Repository\InspectorRepository;
+use App\Repository\JobRepository;
 use App\Service\AssessmentService;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -18,13 +18,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 #[OA\Tag(name: 'Inspectors')]
 class ApiInspectorController extends AbstractController
 {
     public function __construct(
         private readonly InspectorRepository $inspectorRepository,
-        private readonly AssessmentRepository $assessmentRepository,
+        private readonly JobRepository $jobRepository,
         private readonly AssessmentService $assessmentService,
     ) {
     }
@@ -60,6 +61,7 @@ class ApiInspectorController extends AbstractController
         name: 'api_post_inspectors_job',
         requirements: ['id' => '\d+']
     )]
+    #[ParamConverter('assignJobRequest', converter: 'fos_rest.request_body')]
     #[OA\RequestBody(
         required: true,
         content: new Model(type: AssignJobRequest::class)
@@ -81,15 +83,17 @@ class ApiInspectorController extends AbstractController
     )]
     public function assignJob(
         int $id,
-        AssignJobRequest $request
-    ): AssessmentResponse
+        AssignJobRequest $assignJobRequest
+    ): JsonResponse
     {
         $inspector = $this->inspectorRepository->find($id);
-
         if (!$inspector){
             throw new NotFoundHttpException('The inspector was not found.');
         }
-        return $this->assessmentService->assignJob($inspector, $request);
+
+        $assessmentDto = $this->assessmentService->assignJob($inspector, $assignJobRequest);
+
+        return new JsonResponse($assessmentDto, 200);
     }
 
     #[Rest\Put(
@@ -97,6 +101,7 @@ class ApiInspectorController extends AbstractController
         name: 'api_put_inspectors_job',
         requirements: ['id' => '\d+']
     )]
+    #[ParamConverter('completeJobRequest', converter: 'fos_rest.request_body')]
     #[OA\RequestBody(
         required: true,
         content: new Model(type: CompleteJobRequest::class)
@@ -112,7 +117,7 @@ class ApiInspectorController extends AbstractController
     public function completeJob(
         int $id,
         int $jobId,
-        CompleteJobRequest $request
+        CompleteJobRequest $completeJobRequest
     ): Response
     {
         $inspector = $this->inspectorRepository->find($id);
@@ -120,12 +125,13 @@ class ApiInspectorController extends AbstractController
             throw new NotFoundHttpException('The inspector was not found.');
         }
 
-        $assessment = $this->assessmentRepository->findOneBy(['inspector' => $id, 'job' => $jobId]);
-        if (!$assessment){
-            throw new NotFoundHttpException('The job with id ' . $jobId . ' is not assigned to the inspector.');
+        $job = $this->jobRepository->find($jobId);
+        if (!$job){
+            throw new NotFoundHttpException('The job was not found.');
         }
-        $this->assessmentService->completeJob($assessment, $request);
 
-        return new Response('Job completed.');
+        $assessmentDto = $this->assessmentService->completeJob($inspector, $job, $completeJobRequest);
+
+        return new JsonResponse($assessmentDto, 200);
     }
 }
